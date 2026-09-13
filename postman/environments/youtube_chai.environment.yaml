@@ -1,0 +1,4 @@
+name: youtube_chai
+values:
+  - key: server
+    value: 'http://localhost:8000/api/v1'

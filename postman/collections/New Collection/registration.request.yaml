@@ -1,0 +1,40 @@
+$kind: http-request
+description: ""
+url: http://localhost:8000/api/v1/users/register
+method: POST
+body:
+  type: formdata
+  content:
+    - type: text
+      key: fullName
+      value: abdulmateen
+      description: ""
+      disabled: false
+    - type: text
+      key: email
+      value: abdulmateenm50@gmail.com
+      description: ""
+      disabled: false
+    - type: text
+      key: password
+      value: "12345678"
+      description: ""
+      disabled: false
+    - type: text
+      key: username
+      value: chaiaurcode
+      description: ""
+      disabled: false
+    - type: file
+      key: avatar
+      src:
+        - /C:/Users/Pc/Downloads/mine photo.png
+      description: ""
+      disabled: false
+    - type: file
+      key: coverImage
+      src:
+        - /C:/Users/Pc/Downloads/ChatGPT Image Sep 9, 2026, 03_19_21 AM.png
+      description: ""
+      disabled: false
+order: 1789287249372

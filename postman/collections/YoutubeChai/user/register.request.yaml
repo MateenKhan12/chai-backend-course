@@ -1,0 +1,44 @@
+$kind: http-request
+url: "{{server}}/users/register"
+method: POST
+body:
+  type: formdata
+  content:
+    - type: text
+      key: fullName
+      value: abdulmateen
+      description: ""
+      disabled: false
+    - type: text
+      key: email
+      value: abdulmateenm50@gmail.com
+      description: ""
+      disabled: false
+    - type: text
+      key: password
+      value: "12345678"
+      description: ""
+      disabled: false
+    - type: text
+      key: username
+      value: chaicode
+      description: ""
+      disabled: false
+    - type: file
+      key: avatar
+      src:
+        - /C:/Users/Pc/Downloads/mine photo.png
+      description: ""
+      disabled: false
+    - type: file
+      key: coverImage
+      src:
+        - /C:/Users/Pc/Downloads/ayushi01.png
+      description: ""
+      disabled: false
+    - type: text
+      key: ""
+      value: ""
+      description: ""
+      disabled: true
+order: 1789298917581

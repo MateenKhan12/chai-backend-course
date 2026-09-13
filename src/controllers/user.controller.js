@@ -1,71 +1,85 @@
-import {asyncHandler} from "../utils/asyncHandler.js";
-import {User} from "../models/user.model.js";
-import {ApiError} from "../utils/ApiError.js";
-import {uploadToCloudinary} from "../utils/cloudinary.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
+import { User } from "../models/user.model.js";
+import { ApiError } from "../utils/ApiError.js";
+import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
-
 const registerUser = asyncHandler(async (req, res) => {
-    //get user details from frontend postman request
-    //validation - not empty
-    //check if user already exists: username or email
-    //check for images, check for avatar
-    //upload them to cloudinary
-    //create user object - create entry in database
-    // remove password and refresh token field from  reponse
-    //check for user creation response
-    //return response
 
+    // Get user details from frontend/Postman
     const { fullName, username, email, password } = req.body;
-    console.log("email:", email); 
 
+    console.log("BODY:", req.body);
+    console.log("FILES:", req.files);
+    console.log("email:", email);
+
+    // Validation
     if (
-        [fullName, username, email, password].some((field) => field?.trim() === "")
-    ){
-        throw new ApiError("All fields are required", 400);
+        [fullName, username, email, password]
+            .some((field) => field?.trim() === "")
+    ) {
+        throw new ApiError(400, "All fields are required");
     }
 
-   const existedUser =  User.findOne({
-        $or: [{username}, {email}]
-    })
-    if(existedUser){
-        throw new ApiError("User already exists", 409);
+    // Check if user already exists
+    const existedUser = await User.findOne({
+        $or: [{ username }, { email }]
+    });
+
+    if (existedUser) {
+        throw new ApiError(409, "User already exists");
     }
 
-    const avatarLocalPath = req.files?.avatar[0]?.path;
-    const coverImageLocalPath = req.files?.coverImage[0]?.path; 
+    // Get image paths from Multer
+    const avatarLocalPath = req.files?.avatar?.[0]?.path;
+    const coverImageLocalPath = req.files?.coverImage?.[0]?.path;
 
-    if(!avatarLocalPath) {
-        throw new ApiError("Avatar image is required", 400);
+    console.log("Avatar local path:", avatarLocalPath);
+    console.log("Cover image local path:", coverImageLocalPath);
+
+    // Avatar is required
+    if (!avatarLocalPath) {
+        throw new ApiError(400, "Avatar image is required");
     }
 
-    const avatar = await uploadToCloudinary(avatarLocalPath, "avatar");
-    const coverImage = await uploadToCloudinary(coverImageLocalPath, "coverImage");
+    // Upload images to Cloudinary
+    const avatar = await uploadOnCloudinary(avatarLocalPath);
 
-    if(!avatar) {
-        throw new ApiError("Failed to upload avatar image", 400);
+    const coverImage = coverImageLocalPath
+        ? await uploadOnCloudinary(coverImageLocalPath)
+        : null;
+
+    // Check avatar upload
+    if (!avatar) {
+        throw new ApiError(400, "Failed to upload avatar image");
     }
 
-   const user = await User.create({
+    // Create user
+    const user = await User.create({
         fullName,
         username: username.toLowerCase(),
-        email,  
+        email,
         password,
         avatar: avatar.url,
-        coverImage: coverImage.url,
-    })
+        coverImage: coverImage?.url || "",
+    });
 
+    // Remove password and refresh token
     const createdUser = await User.findById(user._id).select(
-        "-password -refreshToken "
-    )
+        "-password -refreshToken"
+    );
 
-    if(!createdUser){
-        throw new ApiError("Failed to create user", 500);
+    if (!createdUser) {
+        throw new ApiError(500, "Failed to create user");
     }
 
     return res.status(201).json(
-        new ApiResponse(200, "User registered successfully", createdUser)
+        new ApiResponse(
+            201,
+            "User registered successfully",
+            createdUser
+        )
     );
-}) 
+});
 
 export { registerUser };
