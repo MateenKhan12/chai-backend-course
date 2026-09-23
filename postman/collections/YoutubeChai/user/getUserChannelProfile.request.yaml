@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{server}}/users/c/one"
+method: GET
+order: 3907758125131338

@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
@@ -121,7 +122,7 @@ const loginUser = asyncHandler(async (req, res) => {
     const {email, username, password} = req.body;
     console.log(email);
     if(!username && !email) {
-        throw new ApiError(400, "Username or email is required");
+        throw new ApiError(400, "username or email is required");
     }
      
     const user = await User.findOne({ $or: [{username}, {email}]
@@ -166,8 +167,8 @@ const loginUser = asyncHandler(async (req, res) => {
 const logoutUser = asyncHandler(async (req, res) => {
      await User.findByIdAndUpdate(
         req.user._id, 
-        { $set:{ 
-            refreshToken: undefined 
+        { $unset:{ 
+            refreshToken: 1 
         } 
     }, 
         {
@@ -313,8 +314,14 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 
 const getUserChannelProfile = asyncHandler(async (req, res) => {
     const { username } = req.params;
+     console.log("USERNAME FROM URL:", username);
+     const user = await User.findOne({
+    username: username.toLowerCase()
+});
+
+console.log("USER FOUND:", user);
     if(!username?.trim()) {
-        throw new ApiError(400, "Username is required");
+        throw new ApiError(400, "username is required");
     }
     const channel = await User.aggregate([
         {
@@ -339,8 +346,8 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
             }
         },
         {
-            addFields: {
-                susbcribersCount: {
+            $addFields: {
+                subscribersCount: {
                      $size: "$subscribers"
                      },
                      channelSubscribedToCount: {
@@ -349,7 +356,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
                      isSubscribed: {
                         $cond: {
                             if: {
-                                $in: [req.user,_id, "subscribers".subscriber]
+                                $in: [req.user._id, "$subscribers.subscriber"]
                             },
                             then: true,
                             else: false

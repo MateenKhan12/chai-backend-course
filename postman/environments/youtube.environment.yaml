@@ -1,5 +1,0 @@
-name: youtube
-values:
-  - key: server
-    value: 'http://localhost:8000/api/v1'
-color: 0
